@@ -3,17 +3,24 @@ if (index < 0 || index >= buckets.length) {
     throw new Error("Trying to access index out of bounds");
 }
 
+class Node {
+    constructor(key, value, next = null) {
+        this.key = key
+        this.value = value
+        this.next = next
+    }
+}
+
 class HashMap {
     constructor() {
         this.loadFactor = 0.75; 
         this.capacity = 16;
-        this.buckets = Array(this.capacity).fill(null).map(() => []);
+        this.buckets = Array(this.capacity).fill(null);
         this.count = 0;
     }
 
     hash(key) {
         let hashCode = 0;
-           
         const primeNumber = 31;
         for (let i = 0; i < key.length; i++) {
           hashCode = (primeNumber * hashCode + key.charCodeAt(i)) % this.capacity
@@ -25,23 +32,26 @@ class HashMap {
     // Añade una clave y su valor al array
     set(key, value) {
         let index = this.hash(key);
-        let bucket = this.buckets[index];
+        let head = this.buckets[index];
 
         if (index < 0 || index >= buckets.length) {
             throw new Error("Trying to access index out of bounds");
         }
 
         // Verificar si la clave ya existe y actualizar el valor si es así
-        for (let pair of bucket) {
-            if (pair[0] === key) {
-                pair[1] = value;
-                return;
+        while(head) {
+            if(head.key === key) {
+                head.value = value;
+                return
             }
+
+            head = head.next
         }
   
         // Si la clave no existe, agregarla
-        bucket[index].push([key, value]);
-        this.count++;
+        const newNode = new Node(key, value, this.buckets[index]);
+        this.buckets[index] = newNode;
+        this.count++
     }
 
     // Toma un key como argumento y devuelve el valor asignado a esa key,
@@ -53,18 +63,20 @@ class HashMap {
             throw new Error("Trying to access index out of bounds");
         }
 
-        let bucket = this.buckets[index];
+        let head = this.buckets[index];
 
         // Si el bucket no existe devuelve undefined
         if(!bucket) return null
 
-        for (const pair of bucket) {
-            if(pair[0] === key) {
-                return pair[1]
+        while(head) {
+            if(head.key === key) {
+                return head.value
             }
+
+            head = head.next
         }
 
-        return null
+        return null // If the key doesn't exist
     }
 
 
@@ -77,35 +89,53 @@ class HashMap {
             throw new Error("Trying to access index out of bounds");
         }
 
-        let bucket = this.buckets[index];
+        let head = this.buckets[index];
 
-        for (const pair of bucket) {
-            if(pair[0] === key) return true;
+        while(head) {
+            if(head.key === key) {
+                return true
+            }
+
+            head = head.next
         }
 
-        return false;
+        return false; // If the key doesn't exist
     }
 
     // Toma un key como argumento, si el key esta en el hash map, lo elimina y devuelve true
     // Si la key no esta en el hash map, devuelve false
     remove(key) {
         let index = this.hash(key);
+        let head = this.buckets[index];
 
         if (index < 0 || index >= buckets.length) {
             throw new Error("Trying to access index out of bounds");
         }
 
-        let bucket = this.buckets[index];
-
-        if(!bucket) return false;
+        if(!head) return false;
         
-        if(bucket[0] === key) {
-            this.buckets[index] = undefined;
+        // Case 1: Remove the first node (head)
+        if(head.key === key) {
+            this.buckets[index] = head.next;
             this.count--;
-            return true;
+            return true
         }
 
-        return false
+        // Case 2: Search the node to remove in the list
+        let currentNode = head;
+        let nextNode = head.next;
+
+        while(nextNode) {
+            if(nextNode.key === key) {
+                currentNode.next = nextNode.next;
+                this.count--;
+                return true
+            }
+            currentNode = nextNode;
+            nextNode = nextNode.next;
+        }
+
+        return false // If the key doesn't exist
     }
 
     // Devuelve el numero the keys guardadas en el hash map
@@ -115,17 +145,21 @@ class HashMap {
 
     // Elimina todas las entradas en el hash map
     clear() {
-        this.buckets = Array(this.buckets.length).fill(null).map(() => []);
+        this.buckets = Array(this.buckets.length).fill(null)
         this.count = 0;
     }
 
     // Devuelve un array conteniendo todas las keys del hash map
     keys() {
         let keys = [];
-        // Cambiar funcionalidad cuando agregue linked lists
+
         for (let i = 0; i < this.buckets.length; i++) {
-            let bucket = this.buckets[i];
-            keys.push(bucket[0]);
+            let current = this.buckets[i];
+            while(current) {
+                keys.push(current.key);
+                current = current.next;
+            }
+
         }
 
         return keys;
@@ -134,10 +168,14 @@ class HashMap {
     // Devuelve un array conteniendo todos los values del hash map
     values() {
         let values = [];
-        // Cambiar funcionalidad cuando agregue linked lists
+
         for (let i = 0; i < this.buckets.length; i++) {
-            let bucket = this.buckets[i];
-            values.push(bucket[1]);
+            let current = this.buckets[i];
+            while(current) {
+                values.push(current.value);
+                current = current.next;
+            }
+
         }
 
         return values;
@@ -147,13 +185,14 @@ class HashMap {
     entries() {
         let allPairs = [];
         for (let i = 0; i < this.buckets.length; i++) {
-            const bucket = this.buckets[i];
-            
-            if(bucket) {
-                allPairs.push(bucket);
+            let current = this.buckets[i];
+            while(current) {
+                allPairs.push([current.key, current.value]);
+                current = current.next;
             }
         }
 
         return allPairs;
     }
+    
 }
