@@ -17,7 +17,7 @@ test.set('lion', 'golden');
 
 console.log(test.capacity);
 
-test.set('moon', 'silver');
+test.set('lion', 'silver');
 
 console.log(test.capacity);
 console.log(test.length());
