@@ -14,6 +14,7 @@ export default class HashMap {
         this.count = 0;
     }
 
+    // Given a key it returns a hash code
     hash(key) {
         let hashCode = 0;
         const primeNumber = 31;
@@ -24,7 +25,7 @@ export default class HashMap {
         return hashCode;
     }
 
-    // Añade una clave y su valor al array
+    // Add a new key and his value to the array
     set(key, value) {
         let index = this.hash(key);
         let head = this.buckets[index];
@@ -33,7 +34,7 @@ export default class HashMap {
             throw new Error("Trying to access index out of bounds");
         }
 
-        // Verificar si la clave ya existe y actualizar el valor si es así
+        // If the key already exists, the old value is overwritten
         while(head) {
             if(head.key === key) {
                 head.value = value;
@@ -43,7 +44,7 @@ export default class HashMap {
             head = head.next
         }
   
-        // Si la clave no existe, agregarla
+        // If the key doesn't exist, create one
         const newNode = new Node(key, value, this.buckets[index]);
         this.buckets[index] = newNode;
         this.count++
@@ -53,8 +54,7 @@ export default class HashMap {
         }
     }
 
-    // Toma un key como argumento y devuelve el valor asignado a esa key,
-    // Si la key no se encontro, devuelve null
+    // Take one argument as a key and returns the value assigned to the key
     get(key) {
         let index = this.hash(key);
 
@@ -64,7 +64,6 @@ export default class HashMap {
 
         let head = this.buckets[index];
 
-        // Si el bucket no existe devuelve undefined
         if(!head) return null
 
         while(head) {
@@ -79,8 +78,7 @@ export default class HashMap {
     }
 
 
-    // Toma un key como argumento y devuelve true o false
-    // dependiendo si esta o no en el hash map
+    // Returns true or false depending if the key exists in the hash map
     has(key) {
         let index = hash(key);
 
@@ -101,8 +99,8 @@ export default class HashMap {
         return false; // If the key doesn't exist
     }
 
-    // Toma un key como argumento, si el key esta en el hash map, lo elimina y devuelve true
-    // Si la key no esta en el hash map, devuelve false
+    // If the key exists in the hash map, removes the entry and returns `true`
+    // If the key does not exist, returns `false`
     remove(key) {
         let index = this.hash(key);
         let head = this.buckets[index];
@@ -137,18 +135,18 @@ export default class HashMap {
         return false // If the key doesn't exist
     }
 
-    // Devuelve el numero the keys guardadas en el hash map
+    // Returns the number of stored keys in the hashmap
     length() {
         return this.count;
     }
 
-    // Elimina todas las entradas en el hash map
+    // Removes all entries in the hash map
     clear() {
         this.buckets = Array(this.buckets.length).fill(null)
         this.count = 0;
     }
 
-    // Devuelve un array conteniendo todas las keys del hash map
+    // Returns an array containing all the keys in the hash map
     keys() {
         let keys = [];
 
@@ -164,7 +162,7 @@ export default class HashMap {
         return keys;
     }
 
-    // Devuelve un array conteniendo todos los values del hash map
+    // Returns an array containing all the values in the hash map
     values() {
         let values = [];
 
@@ -180,7 +178,7 @@ export default class HashMap {
         return values;
     }
 
-    // Devuelve un array que contiene cada par de key y value
+    // Returns an array of all the keys-value pairs in the hash map
     entries() {
         let allPairs = [];
         for (let i = 0; i < this.buckets.length; i++) {
@@ -194,7 +192,7 @@ export default class HashMap {
         return allPairs;
     }
     
-    // Duplicar el espacio del hashmap
+    // Doubles the capacity of buckets in the hash map
     resize() {
         this.capacity = this.capacity * 2;
         let resizedBuckets = Array(this.capacity).fill(null);
